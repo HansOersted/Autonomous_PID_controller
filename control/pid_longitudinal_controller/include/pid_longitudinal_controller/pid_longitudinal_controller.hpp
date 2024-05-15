@@ -68,6 +68,8 @@ public:
   explicit PidLongitudinalController(rclcpp::Node & node);
 
 private:
+  
+  double m_pid_acc{0.0}; // acceleration command from PID controller (excluding feedforward)
   struct Motion
   {
     double vel{0.0};

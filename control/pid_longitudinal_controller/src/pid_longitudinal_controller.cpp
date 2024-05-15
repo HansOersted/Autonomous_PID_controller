@@ -1087,8 +1087,10 @@ double PidLongitudinalController::applyVelocityFeedback(const ControlData & cont
   const double error_vel_filtered = m_lpf_vel_error->filter(diff_vel);
 
   std::vector<double> pid_contributions(3);
-  const double pid_acc =
+  const double pid_acc_before_integral =
     m_pid_vel.calculate(error_vel_filtered, control_data.dt, enable_integration, pid_contributions);
+
+  m_pid_acc += pid_acc_before_integral * control_data.dt;
 
   // Feedforward scaling:
   // This is for the coordinate conversion where feedforward is applied, from Time to Arclength.
@@ -1102,7 +1104,7 @@ double PidLongitudinalController::applyVelocityFeedback(const ControlData & cont
   const double ff_acc =
     control_data.interpolated_traj.points.at(control_data.target_idx).acceleration_mps2 * ff_scale;
 
-  const double feedback_acc = ff_acc + pid_acc;
+  const double feedback_acc = ff_acc + m_pid_acc;
 
   m_debug_values.setValues(DebugValues::TYPE::ACC_CMD_PID_APPLIED, feedback_acc);
   m_debug_values.setValues(DebugValues::TYPE::ERROR_VEL_FILTERED, error_vel_filtered);
